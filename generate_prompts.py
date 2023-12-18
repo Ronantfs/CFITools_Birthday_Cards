@@ -17,11 +17,24 @@ def create_chatgpt_prompt(name, birthday, gender, personal_info):
         prompt += generic
     return prompt
 
-def generate_prompts(csv_file_path, output_file_path, personal_info_columns):
+def create_dalle_prompt(name, birthday, gender, dalle_personal_info):
+    """Creates a birthday card generting prompt (string) using personal (dalle) information."""
+    dalle_prompt = f"Create a birthday card for {name}, a {gender} crossfit gym member, whose birthday is on {birthday}."
+
+    '''if dalle_personal_info:
+        additional_info = " ".join([f"{key}: {value}." for key, value in dalle_personal_info.items()])
+        dalle_prompt += f"Include personal touches such as {additional_info}"
+    else:
+        generic = "fun crossfit super hero"
+        dalle_prompt += generic'''
+
+    return dalle_prompt
+
+
+def generate_prompts(populated_data_df, output_file_path, personal_info_columns):
     """Generates ChatGPT prompts from a CSV file and saves them to another CSV file."""
-    df = pd.read_csv(csv_file_path)
+    df = populated_data_df
     df['Personal Info'] = df.apply(create_personal_info_dict, axis=1, personal_info_columns=personal_info_columns)
     df['ChatGPT Prompts'] = df.apply(lambda row: create_chatgpt_prompt(row['Name'], row['Birthday'], row['Gender'], row['Personal Info']), axis=1)
+    df['DALL-E Prompts'] = df.apply(lambda row: create_dalle_prompt(row['Name'], row['Birthday'], row['Gender'], row['Personal Info']), axis=1)
     df.to_csv(output_file_path, index=False)
-
-
